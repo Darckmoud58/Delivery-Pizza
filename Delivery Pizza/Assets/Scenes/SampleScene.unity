@@ -562,6 +562,58 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d36e7b215772b0f4d822ecac91c86dbb, type: 3}
+--- !u!1 &1918571606
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1918571608}
+  - component: {fileID: 1918571607}
+  m_Layer: 0
+  m_Name: LevelGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1918571607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918571606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d27eb81ab20c2042b108eb7632ab5d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 4300394385201915130, guid: bba76c5c56d121f45b30ac5e53737850, type: 3}
+  baseSegment: {fileID: 0}
+  randomSegments:
+  - {fileID: 8523648399411884622, guid: ae05fdae52d6b304f8c9159bd5b0cabd, type: 3}
+  - {fileID: 3022077841169584949, guid: 7d9076cfa323d6c47a38d09aa6d9ef76, type: 3}
+  initialSegments: 3
+  maxActiveSegments: 5
+  spawnTriggerDistance: 9.5
+--- !u!4 &1918571608
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918571606}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &167467531658452831
 GameObject:
   m_ObjectHideFlags: 0
@@ -2929,3 +2981,4 @@ SceneRoots:
   - {fileID: 57356029}
   - {fileID: 1420746790}
   - {fileID: 1642044717}
+  - {fileID: 1918571608}

@@ -89,21 +89,22 @@ public class LevelGenerator : MonoBehaviour
 
     float GetAdvanceLength(GameObject segment)
     {
-        Transform endPoint = segment.transform.Find("EndPoint");
-        if (endPoint != null)
-        {
-            Vector3 delta = endPoint.position - segment.transform.position;
-            float proj = Vector3.Dot(delta, transform.forward);
-            if (proj > 0.01f) return proj;
-        }
-        float len = segmentLength;
-        var rends = segment.GetComponentsInChildren<Renderer>();
-        if (rends != null && rends.Length > 0)
-        {
-            Bounds b = rends[0].bounds;
-            for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
-            len = b.size.z; // asumimos orientación en Z
-        }
-        return len;
+        // Transform endPoint = segment.transform.Find("EndPoint");
+        // if (endPoint != null)
+        // {
+        //     Vector3 delta = endPoint.position - segment.transform.position;
+        //     float proj = Vector3.Dot(delta, transform.forward);
+        //     if (proj > 0.01f) return proj;
+        // }
+        // float len = segmentLength;
+        // var rends = segment.GetComponentsInChildren<Renderer>();
+        // if (rends != null && rends.Length > 0)
+        // {
+        //     Bounds b = rends[0].bounds;
+        //     for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
+        //     len = b.size.z; // asumimos orientación en Z
+        // }
+        // return len;
+        return segmentLength;
     }
 }

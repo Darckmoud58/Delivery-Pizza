@@ -8,7 +8,7 @@ public class CambioCarril : MonoBehaviour
     public float velocidadCambio = 10f;
     public float xCentro = 0f;
     public bool usarCarrilesExplicitos = true;
-    public float[] carrilesX = new float[] { -1.5f, 1.5f };
+    public float[] carrilesX = new float[] { -2.3867f, -1.13f };
     public bool bloquearPosicionInicial = true;
 
     private int carrilActual = 0; // 0 = izquierda, 1 = derecha
@@ -19,17 +19,20 @@ public class CambioCarril : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Si tienes 2 carriles, el índice 0 es Izquierda, el 1 es Derecha.
-        // Vamos a forzar que empiece en la Derecha (índice 1) o Izquierda (0)
-        carrilActual = 1; // 1 para empezar a la derecha, 0 para izquierda.
-        
-        // Opcional: Teletransportar visualmente a la moto al carril de inicio para que no se vea el salto
-        if (carrilesX.Length > 0)
-        {
-             Vector3 inicio = transform.position;
-             inicio.x = carrilesX[carrilActual];
-             transform.position = inicio;
-        }
+        // 1. OBLIGAR al código a usar estas coordenadas exactas en este orden:
+        // Índice 0 (Izq): -2.3867f
+        // Índice 1 (Der): -1.13f
+        carrilesX = new float[] { -2.3867f, -1.13f };
+
+        // 2. Decirle que estamos en la Izquierda (Índice 0)
+        carrilActual = 0;
+
+        // 3. Teletransportar la moto a esa posición
+        float xDestino = carrilesX[carrilActual];
+        transform.position = new Vector3(xDestino, transform.position.y, transform.position.z);
+
+        // 4. Asegurarnos de que el "objetivo" interno también esté sincronizado
+        posicionObjetivo = transform.position;
     }
 
     // Update is called once per frame

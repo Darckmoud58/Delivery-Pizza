@@ -77,6 +77,7 @@ public class LevelGenerator : MonoBehaviour
         activeSegments.Add(newSegment);
 
         float advance = GetAdvanceLength(newSegment);
+        Debug.Log("Se generó tramo: " + newSegment.name + " | Longitud calculada: " + advance);
         nextSpawnPoint = spawnPos + transform.forward * advance;
 
         if (activeSegments.Count > maxActiveSegments)

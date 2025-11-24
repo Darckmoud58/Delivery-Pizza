@@ -122,6 +122,63 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &43494596
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 43494598}
+  - component: {fileID: 43494597}
+  m_Layer: 0
+  m_Name: LevelGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &43494597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43494596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d27eb81ab20c2042b108eb7632ab5d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1420746790}
+  baseSegment: {fileID: 3523434782207458880, guid: bba76c5c56d121f45b30ac5e53737850, type: 3}
+  randomSegments:
+  - {fileID: 8523648399411884622, guid: ae05fdae52d6b304f8c9159bd5b0cabd, type: 3}
+  - {fileID: 3022077841169584949, guid: 7d9076cfa323d6c47a38d09aa6d9ef76, type: 3}
+  initialSegments: 3
+  maxActiveSegments: 5
+  spawnTriggerDistance: 4
+  segmentLength: 4
+  verticalOffsetY: 0
+  snapToGeneratorXY: 1
+  useFixedY: 0
+  fixedY: 0
+--- !u!4 &43494598
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43494596}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.518373, y: 1.3776782, z: -0.45893764}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &57356025
 GameObject:
   m_ObjectHideFlags: 0
@@ -522,7 +579,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 121668231}
-  - {fileID: 1918571608}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1420746788
@@ -644,7 +700,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 14414153533605076, guid: d36e7b215772b0f4d822ecac91c86dbb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.618
+      value: -3.22
       objectReference: {fileID: 0}
     - target: {fileID: 14414153533605076, guid: d36e7b215772b0f4d822ecac91c86dbb, type: 3}
       propertyPath: m_LocalPosition.y
@@ -652,7 +708,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 14414153533605076, guid: d36e7b215772b0f4d822ecac91c86dbb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.955
+      value: -3.31
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d36e7b215772b0f4d822ecac91c86dbb, type: 3}
       propertyPath: m_Name
@@ -663,64 +719,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d36e7b215772b0f4d822ecac91c86dbb, type: 3}
---- !u!1 &1918571606
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1918571608}
-  - component: {fileID: 1918571607}
-  m_Layer: 0
-  m_Name: LevelGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1918571607
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1918571606}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d27eb81ab20c2042b108eb7632ab5d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 4300394385201915130, guid: bba76c5c56d121f45b30ac5e53737850, type: 3}
-  baseSegment: {fileID: 0}
-  randomSegments:
-  - {fileID: 8523648399411884622, guid: ae05fdae52d6b304f8c9159bd5b0cabd, type: 3}
-  - {fileID: 3022077841169584949, guid: 7d9076cfa323d6c47a38d09aa6d9ef76, type: 3}
-  initialSegments: 3
-  maxActiveSegments: 5
-  spawnTriggerDistance: 30
-  segmentLength: 10
-  verticalOffsetY: 0
-  snapToGeneratorXY: 1
-  useFixedY: 0
-  fixedY: 0
-  groundY: 0
---- !u!4 &1918571608
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1918571606}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1218052504}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &6188016371753841
 Transform:
   m_ObjectHideFlags: 0
@@ -3683,3 +3681,4 @@ SceneRoots:
   - {fileID: 1420746790}
   - {fileID: 1218052504}
   - {fileID: 898124557}
+  - {fileID: 43494598}

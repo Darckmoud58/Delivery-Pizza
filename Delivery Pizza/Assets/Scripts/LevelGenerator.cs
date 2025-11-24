@@ -6,21 +6,18 @@ public class LevelGenerator : MonoBehaviour
 {
     public Transform player;
 
-    // Prefab base al inicio
     public GameObject baseSegment;
-
-    // Prefabs aleatorios
     public List<GameObject> randomSegments;
 
     public int initialSegments = 3;
     public int maxActiveSegments = 5;
     public float spawnTriggerDistance = 20f;
     public float segmentLength = 25f;
+
     public float verticalOffsetY = 0f;
     public bool snapToGeneratorXY = true;
     public bool useFixedY = false;
     public float fixedY = 0f;
-    public float groundY = 0f;
 
     private Vector3 nextSpawnPoint;
     private List<GameObject> activeSegments = new List<GameObject>();
@@ -35,10 +32,10 @@ public class LevelGenerator : MonoBehaviour
             if (moto != null) player = moto.transform;
         }
 
-        // 1) SIEMPRE generar el Base primero
+        // 1) Base inicial
         SpawnBaseSegment();
 
-        // 2) Generar los dem�s de forma aleatoria
+        // 2) Tramos iniciales
         for (int i = 1; i < initialSegments; i++)
         {
             SpawnRandomSegment();
@@ -47,7 +44,12 @@ public class LevelGenerator : MonoBehaviour
 
     void Update()
     {
-        if (Vector3.Distance(player.position, nextSpawnPoint) < spawnTriggerDistance)
+        if (player == null) return;
+
+        // --- CAMBIO IMPORTANTE: solo usamos la diferencia en Z ---
+        float distZ = nextSpawnPoint.z - player.position.z;
+
+        if (distZ < spawnTriggerDistance)
         {
             SpawnRandomSegment();
         }
@@ -56,9 +58,19 @@ public class LevelGenerator : MonoBehaviour
     void SpawnBaseSegment()
     {
         if (baseSegment == null) return;
+
         Vector3 spawnPos = nextSpawnPoint + Vector3.up * verticalOffsetY;
-        if (snapToGeneratorXY) spawnPos.x = transform.position.x;
-        if (useFixedY) spawnPos.y = fixedY;
+
+        if (snapToGeneratorXY)
+        {
+            spawnPos.x = transform.position.x;
+        }
+
+        if (useFixedY)
+        {
+            spawnPos.y = fixedY;
+        }
+
         GameObject newSegment = Instantiate(baseSegment, spawnPos, transform.rotation);
         activeSegments.Add(newSegment);
 
@@ -68,18 +80,33 @@ public class LevelGenerator : MonoBehaviour
 
     void SpawnRandomSegment()
     {
+        if (randomSegments == null || randomSegments.Count == 0)
+        {
+            Debug.LogWarning("LevelGenerator: randomSegments está vacío.");
+            return;
+        }
+
         GameObject prefab = randomSegments[Random.Range(0, randomSegments.Count)];
 
         Vector3 spawnPos = nextSpawnPoint + Vector3.up * verticalOffsetY;
-        if (snapToGeneratorXY) spawnPos.x = transform.position.x;
-        if (useFixedY) spawnPos.y = fixedY;
+
+        if (snapToGeneratorXY)
+        {
+            spawnPos.x = transform.position.x;
+        }
+
+        if (useFixedY)
+        {
+            spawnPos.y = fixedY;
+        }
+
         GameObject newSegment = Instantiate(prefab, spawnPos, transform.rotation);
         activeSegments.Add(newSegment);
 
         float advance = GetAdvanceLength(newSegment);
-        Debug.Log("Se generó tramo: " + newSegment.name + " | Longitud calculada: " + advance);
         nextSpawnPoint = spawnPos + transform.forward * advance;
 
+        // Reciclado
         if (activeSegments.Count > maxActiveSegments)
         {
             Destroy(activeSegments[0]);

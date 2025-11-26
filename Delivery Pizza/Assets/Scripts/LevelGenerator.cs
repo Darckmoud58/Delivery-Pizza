@@ -7,14 +7,14 @@ public class LevelGenerator : MonoBehaviour
     public Transform player;
 
     [Header("Prefabs de Tramos")]
-    public GameObject baseSegment;              // Prefab base al inicio
-    public List<GameObject> randomSegments;     // Prefabs aleatorios
+    public GameObject baseSegment;
+    public List<GameObject> randomSegments;
 
     [Header("Configuración de tramos")]
     public int initialSegments = 3;
     public int maxActiveSegments = 5;
-    public float spawnTriggerDistance = 20f;    // Distancia antes del siguiente spawn
-    public float segmentLength = 25f;           // Longitud fija de cada tramo
+    public float spawnTriggerDistance = 20f;
+    public float segmentLength = 25f;
 
     [Header("Posicionamiento")]
     public float verticalOffsetY = 0f;
@@ -22,22 +22,26 @@ public class LevelGenerator : MonoBehaviour
     public bool useFixedY = false;
     public float fixedY = 0f;
 
-    [Header("Pooling")]
-    public int poolSizePerPrefab = 5;           // Cuántos instanciar de cada tipo al inicio
-
-    [Header("Coleccionables (Paso 3)")]
-    public bool spawnCollectibles = false;
-    public GameObject collectiblePrefab;
-    public int collectiblesPerSegment = 3;
-    public float collectibleOffsetY = 1f;
-    public float[] carrilesX = new float[] { -2.3867f, -1.13f }; // mismos que tu CambioCarril
+    // Coleccionables / powerups: deja aquí lo que ya tenías
+    [Header("Coleccionables / PowerUps")]
+    public bool spawnCollectibles = true;
+    public GameObject pizzaPrefab;
+    public GameObject timeBoostPrefab;
+    public GameObject magnetPrefab;
+    public int maxCollectiblesPerSegment = 3;
+    [Range(0f, 1f)] public float collectibleSpawnChance = 0.8f;
+    [Range(0f, 1f)] public float timeBoostChance = 0.1f;
+    [Range(0f, 1f)] public float magnetChance = 0.05f;
+    public float collectibleOffsetY = 0.5f;
+    public float[] carrilesX = new float[] { -2.3867f, -1.13f };
 
     // Estado interno
     private Vector3 nextSpawnPoint;
     private List<GameObject> activeSegments = new List<GameObject>();
 
-    // Pools: prefab -> cola de instancias disponibles
+    // Pools
     private Dictionary<GameObject, Queue<GameObject>> pools = new Dictionary<GameObject, Queue<GameObject>>();
+    private Transform segmentsParent;
 
     void Start()
     {
@@ -49,37 +53,31 @@ public class LevelGenerator : MonoBehaviour
             if (moto != null) player = moto.transform;
         }
 
-        // Crear pools para todos los prefabs
+        // contenedor para tener ordenada la jerarquía
+        segmentsParent = new GameObject("SegmentsPool").transform;
+        segmentsParent.SetParent(transform);
+
+        // Solo creamos las colas vacías
         InitPoolForPrefab(baseSegment);
         if (randomSegments != null)
         {
             foreach (var p in randomSegments)
-            {
                 InitPoolForPrefab(p);
-            }
         }
 
-        // 1) Tramo base
+        // Base + iniciales
         SpawnBaseSegment();
-
-        // 2) Tramos iniciales
         for (int i = 1; i < initialSegments; i++)
-        {
             SpawnRandomSegment();
-        }
     }
 
     void Update()
     {
         if (player == null) return;
 
-        // Solo nos interesa el eje Z
         float distZ = nextSpawnPoint.z - player.position.z;
-
         if (distZ < spawnTriggerDistance)
-        {
             SpawnRandomSegment();
-        }
     }
 
     // =========================
@@ -89,21 +87,8 @@ public class LevelGenerator : MonoBehaviour
     void InitPoolForPrefab(GameObject prefab)
     {
         if (prefab == null) return;
-        if (pools.ContainsKey(prefab)) return;
-
-        var queue = new Queue<GameObject>();
-        pools[prefab] = queue;
-
-        for (int i = 0; i < poolSizePerPrefab; i++)
-        {
-            GameObject obj = Instantiate(prefab, new Vector3(0, -1000, 0), Quaternion.identity);
-            var info = obj.GetComponent<SegmentPoolInfo>();
-            if (info == null) info = obj.AddComponent<SegmentPoolInfo>();
-            info.prefabOrigin = prefab;
-
-            obj.SetActive(false);
-            queue.Enqueue(obj);
-        }
+        if (!pools.ContainsKey(prefab))
+            pools[prefab] = new Queue<GameObject>();
     }
 
     GameObject GetFromPool(GameObject prefab, Vector3 position, Quaternion rotation)
@@ -117,6 +102,8 @@ public class LevelGenerator : MonoBehaviour
         }
 
         GameObject obj;
+
+        // Si hay uno disponible, lo reusamos
         if (queue.Count > 0)
         {
             obj = queue.Dequeue();
@@ -126,15 +113,16 @@ public class LevelGenerator : MonoBehaviour
         }
         else
         {
-            obj = Instantiate(prefab, position, rotation);
+            // Si no hay, instanciamos uno nuevo
+            obj = Instantiate(prefab, position, rotation, segmentsParent);
         }
 
-        // Aseguramos que tenga la referencia al prefab original
+        // Aseguramos info de origen
         var info = obj.GetComponent<SegmentPoolInfo>();
         if (info == null) info = obj.AddComponent<SegmentPoolInfo>();
         info.prefabOrigin = prefab;
 
-        // Limpiamos coleccionables viejos y generamos nuevos (si está activado el paso 3)
+        // Limpiamos y generamos coleccionables
         ClearCollectibles(obj);
         SpawnCollectiblesOnSegment(obj);
 
@@ -152,9 +140,7 @@ public class LevelGenerator : MonoBehaviour
             return;
         }
 
-        // Limpiar coleccionables que queden
         ClearCollectibles(obj);
-
         obj.SetActive(false);
 
         if (!pools.TryGetValue(info.prefabOrigin, out Queue<GameObject> queue))
@@ -189,7 +175,7 @@ public class LevelGenerator : MonoBehaviour
     {
         if (randomSegments == null || randomSegments.Count == 0)
         {
-            Debug.LogWarning("LevelGenerator: randomSegments está vacío.");
+            Debug.LogWarning("LevelGenerator: randomSegments vacío.");
             return;
         }
 
@@ -205,7 +191,7 @@ public class LevelGenerator : MonoBehaviour
         float advance = GetAdvanceLength(newSegment);
         nextSpawnPoint = spawnPos + transform.forward * advance;
 
-        // Reciclado con pooling
+        // reciclado
         if (activeSegments.Count > maxActiveSegments)
         {
             GameObject oldest = activeSegments[0];
@@ -227,16 +213,29 @@ public class LevelGenerator : MonoBehaviour
     void SpawnCollectiblesOnSegment(GameObject segment)
     {
         if (!spawnCollectibles) return;
-        if (collectiblePrefab == null) return;
-        if (carrilesX == null || carrilesX.Length == 0) return;
-        if (collectiblesPerSegment <= 0) return;
 
-        // Distribuimos los coleccionables a lo largo del tramo
-        for (int i = 0; i < collectiblesPerSegment; i++)
+        bool hayPizza = pizzaPrefab != null;
+        bool hayTiempo = timeBoostPrefab != null;
+        bool hayIman = magnetPrefab != null;
+
+        if (!hayPizza && !hayTiempo && !hayIman) return;
+        if (carrilesX == null || carrilesX.Length == 0) return;
+        if (maxCollectiblesPerSegment <= 0) return;
+
+        // Número aleatorio de slots en este tramo (1..max)
+        int slots = Random.Range(1, maxCollectiblesPerSegment + 1);
+
+        for (int i = 0; i < slots; i++)
         {
-            float frac = (i + 1f) / (collectiblesPerSegment + 1f); // 0..1
+            // Probabilidad de NO generar nada en este slot
+            if (Random.value > collectibleSpawnChance)
+                continue;
+
+            // Calcular posición Z del slot en el tramo
+            float frac = (i + 1f) / (slots + 1f);
             float zPos = segment.transform.position.z + segmentLength * frac;
 
+            // Elegir carril aleatorio
             float laneX = carrilesX[Random.Range(0, carrilesX.Length)];
 
             Vector3 pos = new Vector3(
@@ -245,21 +244,42 @@ public class LevelGenerator : MonoBehaviour
                 zPos
             );
 
-            GameObject item = Instantiate(collectiblePrefab, pos, Quaternion.identity);
-            item.transform.SetParent(segment.transform); // para que viaje con el tramo
+            // --- Determinar tipo de ítem ---
+            GameObject prefabElegido = null;
+            float roll = Random.value;
+
+            if (hayTiempo && roll < timeBoostChance)
+            {
+                prefabElegido = timeBoostPrefab;
+            }
+            else if (hayIman && roll < timeBoostChance + magnetChance)
+            {
+                prefabElegido = magnetPrefab;
+            }
+            else if (hayPizza)
+            {
+                prefabElegido = pizzaPrefab;
+            }
+
+            if (prefabElegido == null) continue;
+
+            // Instanciar ítem como hijo del tramo
+            GameObject item = Instantiate(prefabElegido, pos, Quaternion.identity);
+            item.transform.SetParent(segment.transform);
+
+            // Añadir marker para limpieza automática en pooling
+            if (item.GetComponent<CollectibleMarker>() == null)
+                item.AddComponent<CollectibleMarker>();
         }
     }
 
     void ClearCollectibles(GameObject segment)
     {
-        // Destruye todos los hijos que tengan CollectiblePizza
-        var collectibles = segment.GetComponentsInChildren<CollectiblePizza>(true);
-        foreach (var c in collectibles)
+        var markers = segment.GetComponentsInChildren<CollectibleMarker>(true);
+        foreach (var m in markers)
         {
-            if (c != null && c.gameObject != segment)
-            {
-                Destroy(c.gameObject);
-            }
+            if (m != null && m.gameObject != segment)
+                Destroy(m.gameObject);
         }
     }
 }

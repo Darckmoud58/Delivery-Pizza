@@ -2,11 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimeBoostCollectible : MonoBehaviour
+public class MagnetPowerUp : MonoBehaviour
 {
-    [Header("Config")]
-    public float tiempoExtra = 5f;  // segundos a sumar
-    public int puntos = 0;          // opcional, puntos extra
+    public float duracion = 5f; // segundos de magneto
     // Start is called before the first frame update
     void Start()
     {
@@ -24,7 +22,6 @@ public class TimeBoostCollectible : MonoBehaviour
         var col = GetComponent<Collider>();
         col.isTrigger = true;
 
-        // Para que el LevelGenerator lo limpie al reciclar el tramo
         if (GetComponent<CollectibleMarker>() == null)
             gameObject.AddComponent<CollectibleMarker>();
     }
@@ -34,12 +31,11 @@ public class TimeBoostCollectible : MonoBehaviour
         if (!other.CompareTag("Player")) return;
         if (GameManager.Inst == null || !GameManager.Inst.enJuego) return;
 
-        // Sumar tiempo
-        GameManager.Inst.tiempo += tiempoExtra;
-
-        // Opcional: sumar puntos
-        if (puntos > 0)
-            GameManager.Inst.SumarPuntos(puntos);
+        MagnetEffect magnet = other.GetComponent<MagnetEffect>();
+        if (magnet != null)
+        {
+            magnet.Activar(duracion);
+        }
 
         Destroy(gameObject);
     }

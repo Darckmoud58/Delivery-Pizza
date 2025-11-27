@@ -43,6 +43,23 @@ public class LevelGenerator : MonoBehaviour
     private Dictionary<GameObject, Queue<GameObject>> pools = new Dictionary<GameObject, Queue<GameObject>>();
     private Transform segmentsParent;
 
+
+    [Header("Obstáculos")]
+    public bool spawnObstacles = true;
+    public List<GameObject> obstaclePrefabs;
+
+    // cuántos tramos sin obstáculos al inicio (zona segura)
+    public int safeSegmentsWithoutObstacles = 2;
+
+    public int maxObstaclesPerSegment = 1;
+    [Range(0f, 1f)] public float obstacleSpawnChance = 0.3f;
+    public float obstacleOffsetY = 0f;
+
+    // distancia mínima entre obstáculos consecutivos en el eje Z
+    public float minObstacleDistanceZ = 10f;
+    private int segmentsSpawned = 0;
+    private float lastObstacleZ = Mathf.NegativeInfinity;
+
     void Start()
     {
         nextSpawnPoint = transform.position;
@@ -124,6 +141,8 @@ public class LevelGenerator : MonoBehaviour
 
         // Limpiamos y generamos coleccionables
         ClearCollectibles(obj);
+        ClearObstacles(obj);
+        SpawnObstaclesOnSegment(obj);
         SpawnCollectiblesOnSegment(obj);
 
         return obj;
@@ -140,7 +159,11 @@ public class LevelGenerator : MonoBehaviour
             return;
         }
 
+
+        // limpiar antes de guardarlo
+        ClearObstacles(obj);
         ClearCollectibles(obj);
+
         obj.SetActive(false);
 
         if (!pools.TryGetValue(info.prefabOrigin, out Queue<GameObject> queue))
@@ -167,6 +190,13 @@ public class LevelGenerator : MonoBehaviour
         GameObject newSegment = GetFromPool(baseSegment, spawnPos, transform.rotation);
         activeSegments.Add(newSegment);
 
+        // 🔹 este es el primer segmento
+        segmentsSpawned++;
+
+        // obsts / coleccionables
+        SpawnObstaclesOnSegment(newSegment);
+        SpawnCollectiblesOnSegment(newSegment);
+
         float advance = GetAdvanceLength(newSegment);
         nextSpawnPoint = spawnPos + transform.forward * advance;
     }
@@ -188,10 +218,16 @@ public class LevelGenerator : MonoBehaviour
         GameObject newSegment = GetFromPool(prefab, spawnPos, transform.rotation);
         activeSegments.Add(newSegment);
 
+        // 🔹 nuevo segmento generado
+        segmentsSpawned++;
+
+        // obsts / coleccionables
+        SpawnObstaclesOnSegment(newSegment);
+        SpawnCollectiblesOnSegment(newSegment);
+
         float advance = GetAdvanceLength(newSegment);
         nextSpawnPoint = spawnPos + transform.forward * advance;
 
-        // reciclado
         if (activeSegments.Count > maxActiveSegments)
         {
             GameObject oldest = activeSegments[0];
@@ -282,6 +318,63 @@ public class LevelGenerator : MonoBehaviour
                 Destroy(m.gameObject);
         }
     }
+
+    void SpawnObstaclesOnSegment(GameObject segment)
+    {
+        if (!spawnObstacles) return;
+        if (obstaclePrefabs == null || obstaclePrefabs.Count == 0) return;
+        if (carrilesX == null || carrilesX.Length == 0) return;
+        if (maxObstaclesPerSegment <= 0) return;
+
+        // 🔹 Zona segura al inicio: los primeros N segmentos no tienen obstáculos
+        if (segmentsSpawned <= safeSegmentsWithoutObstacles)
+            return;
+
+        int slots = Random.Range(1, maxObstaclesPerSegment + 1);
+
+        for (int i = 0; i < slots; i++)
+        {
+            if (Random.value > obstacleSpawnChance)
+                continue;
+
+            float frac = (i + 1f) / (slots + 1f);
+            float zPos = segment.transform.position.z + segmentLength * frac;
+
+            // 🔹 Distancia mínima global entre obstáculos
+            if (zPos - lastObstacleZ < minObstacleDistanceZ)
+                continue;
+
+            float laneX = carrilesX[Random.Range(0, carrilesX.Length)];
+
+            Vector3 pos = new Vector3(
+                laneX,
+                segment.transform.position.y + obstacleOffsetY,
+                zPos
+            );
+
+            GameObject prefab = obstaclePrefabs[Random.Range(0, obstaclePrefabs.Count)];
+            if (prefab == null) continue;
+
+            GameObject obst = Instantiate(prefab, pos, Quaternion.identity);
+            obst.transform.SetParent(segment.transform);
+
+            if (obst.GetComponent<ObstacleMarker>() == null)
+                obst.AddComponent<ObstacleMarker>();
+
+            // 🔹 Actualizamos la última Z donde hay obstáculo
+            lastObstacleZ = zPos;
+        }
+    }
+
+    void ClearObstacles(GameObject segment)
+    {
+        var markers = segment.GetComponentsInChildren<ObstacleMarker>(true);
+        foreach (var m in markers)
+        {
+            if (m != null && m.gameObject != segment)
+                Destroy(m.gameObject);
+        }
+    }
 }
 
 // Este componente marca un objeto como coleccionable hijo de un tramo
@@ -289,8 +382,15 @@ public class CollectibleMarker : MonoBehaviour
 {
 }
 
+public class ObstacleMarker : MonoBehaviour
+{
+
+}
+
 // Este componente guarda de qué prefab salió el tramo (para el pool)
 public class SegmentPoolInfo : MonoBehaviour
 {
     [HideInInspector] public GameObject prefabOrigin;
 }
+
+
